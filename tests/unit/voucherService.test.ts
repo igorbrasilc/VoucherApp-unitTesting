@@ -24,6 +24,15 @@ describe("voucherService test suite", () => {
     const voucher = {id: 1, code: 'A4D3D5', discount: 20, used: false};
     jest.spyOn(voucherRepository, 'getVoucherByCode').mockResolvedValueOnce(voucher);
     jest.spyOn(voucherRepository, 'useVoucher').mockResolvedValueOnce({...voucher, used: true});
-    
+
+    const test = await service.default.applyVoucher(voucher.code, 200);
+    expect(test).toEqual({amount: 200, discount: 20, finalAmount: 160, applied: true})
+  })
+
+  it("should not apply voucher", async () => {
+    const voucher = {id: 1, code: 'A4D3D5', discount: 20, used: false};
+    jest.spyOn(voucherRepository, 'getVoucherByCode').mockResolvedValueOnce(null);
+
+    expect(service.default.applyVoucher(voucher.code, voucher.discount)).rejects.toEqual(errorUtils.conflictError("Voucher does not exist."));
   })
 })
